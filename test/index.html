@@ -1,0 +1,72 @@
+<script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script>
+
+customer_user_id = "3c365fb4e572e1d0d41eb404691d0bfa";
+
+</script>
+
+
+<table id='stuffgoeshere' class='table'>
+
+</table>
+
+<button onclick='getTickets()'>Get Tickets</button>
+
+<script>
+
+function getTickets(){
+  data = '{"customer_user_id":"'+customer_user_id+'"}';
+
+  $.post('/api/getTickets.json', data, function(response) { 
+    console.log(response);
+    count = response['search_results']['count'];
+    output = "";
+    for (var i = 0; i < count; i++){
+	ticket = response['data']['tickets'][i];
+	ticket_subject = ticket['title'];
+	ticket_id = ticket['id'];
+	ticket_modified = ticket['change_time'];
+	ticket_created = ticket['create_time'];
+	ticket_state = ticket['status'];
+	output += "<tr id='ticket_"+ticket_id+"' onclick='getArticles("+ticket_id+")'> <td>"+i+"</td> <td>"+ticket_id+"</td> <td>"+ticket_subject+"</td> <td>"+ticket_modified+"</td> <td>"+ticket_created+"</td> <td>"+ticket_state+"</td> </tr>";
+	
+
+    }
+	$('#stuffgoeshere').html(output);
+
+  }, 'json');
+
+
+}
+
+function getArticles(ticket_id){
+  data = '{"ticket_id":"'+ticket_id+'"}';
+  $.post('/api/getArticles.json', data, function(response) {
+    console.log(response);
+    count = response['search_results']['count'];
+    output = "";
+    for (var i = 0; i < count; i++){
+	article = response['data']['articles'][i];
+	article_id = article['id'];
+	article_type = article['type'];
+	article_create = article['create_time'];
+	article_modified = article['change_time'];
+	article_body = article['a_body'];
+	article_subject = article['a_subject'];
+
+	if(article['a_to']){
+		to = article['a_to'];
+		to = "<br>To: "+to;
+	}else{ to = "";}
+
+	output += "<tr id='article_"+article_id+"'><td colspan='6'>Type: "+article_type+"<br>Created: "+article_create+"<br>Subject: "+article_subject+to+"<br>Message:<pre>"+article_body+"</pre></td></tr>";
+
+    }	
+	$( "#ticket_"+ticket_id ).after( output );
+  }, 'json');
+
+}
+
+</script>
