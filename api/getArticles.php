@@ -15,11 +15,13 @@ $article_types = getArticleTypes();
 // If no ticket_number or ticket_id presented, error
 if(!$ticket_number && !$ticket_id){ return_error("Invalid Ticket_Id provided!"); return; }
 
-// If Ticket Number provided and no id provided, translate ticket_number to ticket_id
-if($ticket_number && !$ticket_id){ $ticket_id = mysqli_fetch_assoc(mysqli_query($conn, "SELECT `id` FROM `tickets` WHERE `tn` LIKE %$ticket_number% "))['id']; }
-
+// Validate that the Ticket Number Translates Properly to the Ticket Id
+if($ticket_number && $ticket_id){ 
+	$temp_ticket_id = mysqli_fetch_assoc(mysqli_query($conn, "SELECT `id` FROM `ticket` WHERE `tn` = $ticket_number "))['id']; 
+	if($ticket_id != $temp_ticket_id){ return_error("Ticket ID and Ticket Number Don't Match", 1); return; }
+}
 // If the ticket id is not provided or found, error
-if(!$ticket_id){ return_error("Invalid Information Provided",1); return; }
+else{ return_error("Invalid Information Provided",1); return; }
 
 // Grab Article Types
 function getArticleTypes(){
